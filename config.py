@@ -9,9 +9,9 @@ def argument_parser():
     parser.add_argument("--debug", action='store_false')
 
     parser.add_argument("--batchsize", type=int, default=64)
-    parser.add_argument("--train_epoch", type=int, default=30)
-    parser.add_argument("--height", type=int, default=256)
-    parser.add_argument("--width", type=int, default=192)
+    parser.add_argument("--train_epoch", type=int, default=40)
+    parser.add_argument("--height", type=int, default=224)
+    parser.add_argument("--width", type=int, default=224)
     parser.add_argument("--lr_ft", type=float, default=0.01, help='learning rate of feature extractor')
     parser.add_argument("--lr_new", type=float, default=0.1, help='learning rate of classifier_base')
     parser.add_argument('--classifier', type=str, default='base', help='classifier name')
