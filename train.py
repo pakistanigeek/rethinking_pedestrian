@@ -45,7 +45,7 @@ def main(args):
         dataset=train_set,
         batch_size=args.batchsize,
         shuffle=True,
-        num_workers=4,
+        num_workers=2,
         pin_memory=True,
     )
     valid_set = AttrDataset(args=args, split=args.valid_split, transform=valid_tsfm)
@@ -54,7 +54,7 @@ def main(args):
         dataset=valid_set,
         batch_size=args.batchsize,
         shuffle=False,
-        num_workers=4,
+        num_workers=2,
         pin_memory=True,
     )
 

@@ -7,6 +7,7 @@ import torch.nn.functional as F
 
 import torchvision.models.resnet
 from .bam import *
+from .cbam import *
 
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152', 'resnext50_32x4d', 'resnext101_32x8d']
@@ -53,6 +54,7 @@ class BasicBlock(nn.Module):
         self.bn2 = norm_layer(planes)
         self.downsample = downsample
         self.stride = stride
+        self.cbam = CBAM( planes, 16 )
 
     def forward(self, x):
         identity = x
@@ -66,7 +68,7 @@ class BasicBlock(nn.Module):
 
         if self.downsample is not None:
             identity = self.downsample(x)
-
+        out = self.cbam(out)
         out += identity
         out = self.relu(out)
 
@@ -92,6 +94,7 @@ class Bottleneck(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
         self.stride = stride
+        self.cbam = CBAM( planes * 4, 16 )
 
     def forward(self, x):
         identity = x
@@ -109,7 +112,7 @@ class Bottleneck(nn.Module):
 
         if self.downsample is not None:
             identity = self.downsample(x)
-
+        out = self.cbam(out)
         out += identity
         out = self.relu(out)
 
@@ -147,10 +150,10 @@ class ResNet(nn.Module):
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
 
-        self.bam1 = BAM(64*block.expansion)
-        self.bam2 = BAM(128*block.expansion)
-        self.bam3 = BAM(256*block.expansion)
-        self.bam4 = BAM(512*block.expansion)
+        # self.bam1 = BAM(64*block.expansion)
+        # self.bam2 = BAM(128*block.expansion)
+        # self.bam3 = BAM(256*block.expansion)
+        # self.bam4 = BAM(512*block.expansion)
 
 
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
@@ -213,13 +216,13 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
 
         x = self.layer1(x)
-        x = self.bam1(x)
+        # x = self.bam1(x)
         x = self.layer2(x)
-        x = self.bam2(x)
+        # x = self.bam2(x)
         x = self.layer3(x)
-        x = self.bam3(x)
+        # x = self.bam3(x)
         x = self.layer4(x)
-        x = self.bam4(x)
+        # x = self.bam4(x)
 
         return x
 

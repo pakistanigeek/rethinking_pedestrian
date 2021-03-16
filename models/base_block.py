@@ -8,7 +8,7 @@ class BaseClassifier(nn.Module):
     def __init__(self, nattr):
         super().__init__()
         self.logits = nn.Sequential(
-            # nn.Dropout(.4),
+            nn.Dropout(.4),
             nn.Linear(2048, nattr),
             nn.BatchNorm1d(nattr)
         )
