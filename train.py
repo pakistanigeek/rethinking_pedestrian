@@ -15,6 +15,7 @@ from models.base_block import FeatClassifier, BaseClassifier
 from models.resnet import resnet50
 from tools.function import get_model_log_path, get_pedestrian_metrics
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed
+from models.inceptionresenetv2 import inceptionresnetv2
 
 set_seed(605)
 
@@ -65,7 +66,8 @@ def main(args):
     labels = train_set.label
     sample_weight = labels.mean(0)
 
-    backbone = resnet50()
+    # backbone = resnet50()
+    backbone = inceptionresnetv2(pretrained=None)
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
 
