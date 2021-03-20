@@ -299,7 +299,7 @@ class InceptionResNetV2(nn.Module):
         )
         self.block8 = Block8(noReLU=True)
         self.conv2d_7b = BasicConv2d(2080, 1536, kernel_size=1, stride=1)
-        self.avgpool_1a = nn.AvgPool2d(4, count_include_pad=False)
+        self.avgpool_1a = nn.AvgPool2d(6, count_include_pad=False)
         self.last_linear = nn.Linear(1536, num_classes)
 
     def features(self, input):
