@@ -12,7 +12,7 @@ from config import argument_parser
 from dataset.AttrDataset import AttrDataset, get_transform
 from loss.CE_loss import CEL_Sigmoid
 from models.base_block import FeatClassifier, BaseClassifier
-from models.resnet import resnet50
+from models.resnet_org import resnet50
 from tools.function import get_model_log_path, get_pedestrian_metrics
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed
 from models.inceptionresenetv2 import inceptionresnetv2
@@ -30,7 +30,7 @@ def main(args):
 
     if args.redirector:
         print('redirector stdout')
-        ReDirectSTD(stdout_file, 'stdout', False)
+        ReDirectSTD(stdout_file, 'stdout', True)
 
     pprint.pprint(OrderedDict(args.__dict__))
 
@@ -67,8 +67,8 @@ def main(args):
     labels = train_set.label
     sample_weight = labels.mean(0)
 
-    backbone = cbam_resnet50()
-    # backbone = resnet50()
+    # backbone = cbam_resnet50()
+    backbone = resnet50()
     # backbone = inceptionresnetv2(pretrained='imagenet')
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
@@ -77,9 +77,12 @@ def main(args):
         model = torch.nn.DataParallel(model).cuda()
 
     criterion = CEL_Sigmoid(sample_weight)
-
-    param_groups = [{'params': model.module.finetune_params(), 'lr': args.lr_ft},
-                    {'params': model.module.fresh_params(), 'lr': args.lr_new}]
+    if torch.cuda.is_available():
+        param_groups = [{'params': model.module.finetune_params(), 'lr': args.lr_ft},
+                        {'params': model.module.fresh_params(), 'lr': args.lr_new}]
+    else:
+        param_groups = [{'params': model.finetune_params(), 'lr': args.lr_ft},
+                        {'params': model.fresh_params(), 'lr': args.lr_new}]
     optimizer = torch.optim.SGD(param_groups, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=False)
     lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
 
