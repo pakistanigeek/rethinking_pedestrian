@@ -10,7 +10,15 @@ import torchvision.transforms as T
 
 
 class AttrDataset(data.Dataset):
-
+    PETA_CLASSES = ('accessoryHat','accessoryMuffler','accessoryNothing','accessorySunglasses','hairLong',
+                    'upperBodyCasual', 'upperBodyFormal', 'upperBodyJacket', 'upperBodyLogo', 'upperBodyPlaid', 'upperBodyShortSleeve', 'upperBodyThinStripes', 'upperBodyTshirt','upperBodyOther','upperBodyVNeck',
+                    'lowerBodyCasual', 'lowerBodyFormal', 'lowerBodyJeans', 'lowerBodyShorts', 'lowerBodyShortSkirt','lowerBodyTrousers',
+                    'footwearLeatherShoes', 'footwearSandals', 'footwearShoes', 'footwearSneaker',
+                    'carryingBackpack', 'carryingOther', 'carryingMessengerBag', 'carryingNothing',
+                    'carryingPlasticBags',
+                    'personalLess30', 'personalLess45', 'personalLess60', 'personalLarger60',
+                    'personalMale'
+                    )
     def __init__(self, split, args, transform=None, target_transform=None):
 
         assert args.dataset in ['PETA', 'PETA_dataset', 'PA100k', 'RAP', 'RAP2'], \
@@ -41,6 +49,9 @@ class AttrDataset(data.Dataset):
         self.img_num = self.img_idx.shape[0]
         self.img_id = [img_id[i] for i in self.img_idx]
         self.label = attr_label[self.img_idx]
+
+        self.cat2label = {v: k for k, v in enumerate(self.PETA_CLASSES)}
+        self.label2cat = {v: k for k, v in self.cat2label.items()}
 
     def __getitem__(self, index):
 
