@@ -141,3 +141,19 @@ def get_pedestrian_metrics(gt_label, preds_probs, threshold=0.5):
     result.error_num, result.fn_num, result.fp_num = false_pos + false_neg, false_neg, false_pos
 
     return result
+
+def get_reload_weight(model_path, model):
+    #
+    if torch.cuda.is_available():
+        checkpoint = torch.load(model_path)
+        model.load_state_dict(checkpoint['state_dicts'])
+    else:
+        checkpoint = torch.load(model_path, map_location=torch.device('cpu'))
+        from collections import OrderedDict
+        new_state_dict = OrderedDict()
+        for k, v in checkpoint["state_dicts"].items():
+            name = k[7:]  # remove `module.`
+            new_state_dict[name] = v
+        model.load_state_dict(new_state_dict)
+
+    return model
