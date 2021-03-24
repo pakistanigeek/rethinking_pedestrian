@@ -324,12 +324,12 @@ class InceptionResNetV2(nn.Module):
         x = self.avgpool_1a(features)
         x = x.view(x.size(0), -1)
         x = F.dropout(x, training=self.training)
-        # x = self.last_linear(x)
+        x = self.last_linear(x)
         return x
 
     def forward(self, input):
         x = self.features(input)
-        x = self.logits(x)
+        # x = self.logits(x)
         return x
 
 def inceptionresnetv2(num_classes=1000, pretrained='imagenet'):
