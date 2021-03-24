@@ -8,17 +8,16 @@ class BaseClassifier(nn.Module):
     def __init__(self, nattr):
         super().__init__()
         self.logits = nn.Sequential(
-            nn.Linear(nattr, nattr),
+            nn.Linear(1536, nattr),
             nn.BatchNorm1d(nattr)
         )
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
-        self.conv = nn.Conv2d(2048, nattr, 1, stride=1, bias=True)
+
     def fresh_params(self):
         return self.parameters()
 
     def forward(self, feature):
-        x = self.conv(feature)
-        x = self.avg_pool(x)
+        x = self.avg_pool(feature)
         x = x.view(x.size(0), -1)
         x = self.logits(x)
         return x

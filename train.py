@@ -12,11 +12,9 @@ from config import argument_parser
 from dataset.AttrDataset import AttrDataset, get_transform
 from loss.CE_loss import CEL_Sigmoid
 from models.base_block import FeatClassifier, BaseClassifier
-from models.resnet_org import resnet50
 from tools.function import get_model_log_path, get_pedestrian_metrics
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed
 from models.inceptionresenetv2 import inceptionresnetv2
-from models.cbam_resnet import cbam_resnet50
 
 set_seed(605)
 
@@ -67,9 +65,7 @@ def main(args):
     labels = train_set.label
     sample_weight = labels.mean(0)
 
-    # backbone = cbam_resnet50()
-    backbone = resnet50()
-    # backbone = inceptionresnetv2(pretrained='imagenet')
+    backbone = inceptionresnetv2(pretrained='imagenet')
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
 
@@ -84,7 +80,7 @@ def main(args):
         param_groups = [{'params': model.finetune_params(), 'lr': args.lr_ft},
                         {'params': model.fresh_params(), 'lr': args.lr_new}]
     optimizer = torch.optim.SGD(param_groups, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=False)
-    lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
+    lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.5, patience=4, min_lr=.0001)
 
     best_metric, epoch = trainer(epoch=args.train_epoch,
                                  model=model,

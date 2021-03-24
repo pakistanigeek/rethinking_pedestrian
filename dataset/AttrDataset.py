@@ -78,12 +78,20 @@ def get_transform(args):
     width = args.width
     normalize = T.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     train_transform = T.Compose([
+        T.RandomChoice(
+            [
+                T.RandomAffine(degrees=20),
+                T.ColorJitter(brightness=.5, contrast=.5, saturation=.5, hue=.2),
+            ]
+        ),
         T.Resize((height, width)),
         T.Pad(10),
         T.RandomCrop((height, width)),
         T.RandomHorizontalFlip(),
         T.ToTensor(),
         normalize,
+        T.RandomErasing( p=0.5, scale=(0.02, 0.20) )
+
     ])
 
     valid_transform = T.Compose([
