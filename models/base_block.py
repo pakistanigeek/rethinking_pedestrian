@@ -2,6 +2,7 @@ import math
 
 import torch.nn as nn
 from torch.nn.modules.batchnorm import _BatchNorm
+import torch.nn.functional as F
 
 
 class BaseClassifier(nn.Module):
@@ -19,6 +20,7 @@ class BaseClassifier(nn.Module):
     def forward(self, feature):
         x = self.avg_pool(feature)
         x = x.view(x.size(0), -1)
+        x = F.dropout(x, training=self.training)
         x = self.logits(x)
         return x
 
