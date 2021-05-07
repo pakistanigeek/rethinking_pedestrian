@@ -75,7 +75,16 @@ def valid_trainer(model, valid_loader, criterion):
             gt_list.append(gt_label.cpu().numpy())
             gt_label[gt_label == -1] = 0
             valid_logits = model(imgs)
-            valid_loss = criterion(valid_logits, gt_label)
+            # valid_loss = criterion(valid_logits, gt_label)
+            loss_list = []
+            # deep supervision
+            for k in range(len(valid_logits)):
+                out = valid_logits[k]
+                loss_list.append(criterion(out, gt_label))
+
+            valid_loss = sum(loss_list)
+            valid_logits = torch.max(torch.max(torch.max(valid_logits[0], valid_logits[1]), valid_logits[2]),
+                                     valid_logits[3])
             valid_probs = torch.sigmoid(valid_logits)
             preds_probs.append(valid_probs.cpu().numpy())
             loss_meter.update(to_scalar(valid_loss))

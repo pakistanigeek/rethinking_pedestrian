@@ -42,7 +42,8 @@ class SpatialTransformBlock(nn.Module):
     def stn(self, x, theta):
         grid = F.affine_grid(theta, x.size())
         x = F.grid_sample(x, grid, padding_mode='border')
-        # return x.cuda()
+        if torch.cuda.is_available():
+            return x.cuda()
         return x
 
     def transform_theta(self, theta_i, region_idx):
@@ -51,7 +52,8 @@ class SpatialTransformBlock(nn.Module):
         theta[:,1,1] = torch.sigmoid(theta_i[:,1])
         theta[:,0,2] = torch.tanh(theta_i[:,2])
         theta[:,1,2] = torch.tanh(theta_i[:,3])
-        # theta = theta.cuda()
+        if torch.cuda.is_available():
+            theta = theta.cuda()
         return theta
 
     def forward(self, features):
@@ -113,14 +115,14 @@ class FeatClassifier(nn.Module):
         self.classifier = classifier
 
         num_classes = 35
-        self.st_3b = SpatialTransformBlock(num_classes, 60, 256*3)
-        self.st_4d = SpatialTransformBlock(num_classes, 29, 256*2)
-        self.st_5b = SpatialTransformBlock(num_classes, 6, 256)
+        self.st_3b = SpatialTransformBlock(num_classes, 52, 64*3)
+        self.st_4d = SpatialTransformBlock(num_classes, 25, 64*2)
+        self.st_5b = SpatialTransformBlock(num_classes, 5, 64)
 
         # Lateral layers
-        self.latlayer_3b = nn.Conv2d(192, 256, kernel_size=1, stride=1, padding=0)
-        self.latlayer_4d = nn.Conv2d(320, 256, kernel_size=1, stride=1, padding=0)
-        self.latlayer_5b = nn.Conv2d(2080, 256, kernel_size=1, stride=1, padding=0)
+        self.latlayer_3b = nn.Conv2d(192, 64, kernel_size=1, stride=1, padding=0)
+        self.latlayer_4d = nn.Conv2d(320, 64, kernel_size=1, stride=1, padding=0)
+        self.latlayer_5b = nn.Conv2d(2080, 64, kernel_size=1, stride=1, padding=0)
 
     def fresh_params(self):
         params = self.classifier.fresh_params()
