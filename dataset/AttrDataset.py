@@ -89,8 +89,8 @@ def get_transform(args):
         T.RandomCrop((height, width)),
         T.RandomHorizontalFlip(),
         T.ToTensor(),
-        normalize,
-        T.RandomErasing( p=0.5, scale=(0.02, 0.20) )
+        normalize
+
 
     ])
 

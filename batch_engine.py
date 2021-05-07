@@ -25,7 +25,16 @@ def batch_trainer(epoch, model, train_loader, criterion, optimizer):
         if torch.cuda.is_available():
             imgs, gt_label = imgs.cuda(), gt_label.cuda()
         train_logits = model(imgs, gt_label)
-        train_loss = criterion(train_logits, gt_label)
+        # train_loss = criterion(train_logits, gt_label)
+        loss_list = []
+        # deep supervision
+        for k in range(len(train_logits)):
+            out = train_logits[k]
+            loss_list.append(criterion(out, gt_label))
+
+        train_loss = sum(loss_list)
+        # maximum voting
+        train_logits = torch.max(torch.max(torch.max(train_logits[0], train_logits[1]), train_logits[2]), train_logits[3])
 
         train_loss.backward()
         clip_grad_norm_(model.parameters(), max_norm=12.0)  # make larger learning rate works
@@ -37,7 +46,7 @@ def batch_trainer(epoch, model, train_loader, criterion, optimizer):
         train_probs = torch.sigmoid(train_logits)
         preds_probs.append(train_probs.detach().cpu().numpy())
 
-        log_interval = 20
+        log_interval = 1
         if (step + 1) % log_interval == 0 or (step + 1) % len(train_loader) == 0:
             print(f'{time_str()}, Step {step}/{batch_num} in Ep {epoch}, {time.time() - batch_time:.2f}s ',
                   f'train_loss:{loss_meter.val:.4f}')

@@ -14,7 +14,7 @@ from loss.CE_loss import CEL_Sigmoid
 from models.base_block import FeatClassifier, BaseClassifier
 from tools.function import get_model_log_path, get_pedestrian_metrics
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed
-from models.inceptionresenetv2 import inceptionresnetv2
+from models.inceptionresenetv2_stn import inceptionresnetv2
 
 set_seed(605)
 
