@@ -65,7 +65,7 @@ def main(args):
     labels = train_set.label
     sample_weight = labels.mean(0)
 
-    backbone = inceptionresnetv2(pretrained=None)
+    backbone = inceptionresnetv2(pretrained="imagenet")
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
 

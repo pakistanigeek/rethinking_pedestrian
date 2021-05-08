@@ -321,12 +321,12 @@ class InceptionResNetV2(nn.Module):
         mixed_5b = self.mixed_5b(x)
         repeat = self.repeat(mixed_5b)
         mixed_6a = self.mixed_6a(repeat)
-        x = self.repeat_1(mixed_6a)
-        mixed_7a = self.mixed_7a(x)
+        repeat_1 = self.repeat_1(mixed_6a)
+        mixed_7a = self.mixed_7a(repeat_1)
         repeat_2 = self.repeat_2(mixed_7a)
         x = self.block8(repeat_2)
         x = self.conv2d_7b(x)
-        return x,mixed_7a, mixed_6a, mixed_5b
+        return x,repeat_2, repeat_1, repeat
 
     def logits(self, features):
         x = self.avgpool_1a(features)
