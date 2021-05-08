@@ -115,13 +115,13 @@ class FeatClassifier(nn.Module):
         self.classifier = classifier
 
         num_classes = 35
-        self.st_3b = SpatialTransformBlock(num_classes, 52, 64*3)
-        self.st_4d = SpatialTransformBlock(num_classes, 25, 64*2)
+        self.st_3b = SpatialTransformBlock(num_classes, 25, 64*3)
+        self.st_4d = SpatialTransformBlock(num_classes, 12, 64*2)
         self.st_5b = SpatialTransformBlock(num_classes, 5, 64)
 
         # Lateral layers
-        self.latlayer_3b = nn.Conv2d(192, 64, kernel_size=1, stride=1, padding=0)
-        self.latlayer_4d = nn.Conv2d(320, 64, kernel_size=1, stride=1, padding=0)
+        self.latlayer_3b = nn.Conv2d(320, 64, kernel_size=1, stride=1, padding=0)
+        self.latlayer_4d = nn.Conv2d(1088, 64, kernel_size=1, stride=1, padding=0)
         self.latlayer_5b = nn.Conv2d(2080, 64, kernel_size=1, stride=1, padding=0)
 
     def fresh_params(self):
@@ -137,11 +137,11 @@ class FeatClassifier(nn.Module):
         return torch.cat([up_feat,y], 1)
 
     def forward(self, x, label=None):
-        feat_map,repeat_2, repeat, conv2d_4a = self.backbone(x)
+        feat_map,mixed_7a, mixed_6a, mixed_5b = self.backbone(x)
 
-        fusion_5b = self.latlayer_5b(repeat_2)
-        fusion_4d = self._upsample_add(fusion_5b, self.latlayer_4d(repeat))
-        fusion_3b = self._upsample_add(fusion_4d, self.latlayer_3b(conv2d_4a))
+        fusion_5b = self.latlayer_5b(mixed_7a)
+        fusion_4d = self._upsample_add(fusion_5b, self.latlayer_4d(mixed_6a))
+        fusion_3b = self._upsample_add(fusion_4d, self.latlayer_3b(mixed_5b))
 
         pred_3b = self.st_3b(fusion_3b)
         pred_4d = self.st_4d(fusion_4d)
