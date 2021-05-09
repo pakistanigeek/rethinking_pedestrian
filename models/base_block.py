@@ -117,12 +117,12 @@ class FeatClassifier(nn.Module):
         num_classes = 35
         self.st_3b = SpatialTransformBlock(num_classes, 25, 64*3)
         self.st_4d = SpatialTransformBlock(num_classes, 12, 64*2)
-        self.st_5b = SpatialTransformBlock(num_classes, 52, 256)
+        self.st_5b = SpatialTransformBlock(num_classes, 25, 256)
 
         # Lateral layers
         self.latlayer_3b = nn.Conv2d(320, 64, kernel_size=1, stride=1, padding=0)
         self.latlayer_4d = nn.Conv2d(1088, 64, kernel_size=1, stride=1, padding=0)
-        self.latlayer_5b = nn.Conv2d(192, 256, kernel_size=1, stride=1, padding=0)
+        self.latlayer_5b = nn.Conv2d(320, 256, kernel_size=1, stride=1, padding=0)
 
     def fresh_params(self):
         params = self.classifier.fresh_params()
