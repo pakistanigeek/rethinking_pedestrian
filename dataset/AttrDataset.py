@@ -7,7 +7,8 @@ from PIL import Image
 
 from tools.function import get_pkl_rootpath
 import torchvision.transforms as T
-
+from skimage.feature import hog
+import torch
 
 class AttrDataset(data.Dataset):
 
@@ -49,7 +50,10 @@ class AttrDataset(data.Dataset):
         img = Image.open(imgpath)
 
         if self.transform is not None:
-            img = self.transform(img)
+            img = self.transform[0](img)
+
+        if self.transform is not None:
+            img = self.transform[1](img)
 
         gt_label = gt_label.astype(np.float32)
 
@@ -71,14 +75,16 @@ def get_transform(args):
         T.Pad(10),
         T.RandomCrop((height, width)),
         T.RandomHorizontalFlip(),
-        T.ToTensor(),
-        normalize,
     ])
 
     valid_transform = T.Compose([
         T.Resize((height, width)),
+
+    ])
+
+    normalize_transform = T.Compose([
         T.ToTensor(),
         normalize
     ])
 
-    return train_transform, valid_transform
+    return train_transform, valid_transform, normalize_transform

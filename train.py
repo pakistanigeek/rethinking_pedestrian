@@ -36,10 +36,10 @@ def main(args):
     print(f'use GPU{args.device} for training')
     print(f'train set: {args.dataset} {args.train_split}, test set: {args.valid_split}')
 
-    train_tsfm, valid_tsfm = get_transform(args)
+    train_tsfm, valid_tsfm, normalize_tsfm = get_transform(args)
     print(train_tsfm)
 
-    train_set = AttrDataset(args=args, split=args.train_split, transform=train_tsfm)
+    train_set = AttrDataset(args=args, split=args.train_split, transform=(train_tsfm, normalize_tsfm))
 
     train_loader = DataLoader(
         dataset=train_set,
@@ -48,7 +48,7 @@ def main(args):
         num_workers=4,
         pin_memory=True,
     )
-    valid_set = AttrDataset(args=args, split=args.valid_split, transform=valid_tsfm)
+    valid_set = AttrDataset(args=args, split=args.valid_split, transform=(valid_tsfm, normalize_tsfm))
 
     valid_loader = DataLoader(
         dataset=valid_set,
@@ -74,8 +74,13 @@ def main(args):
 
     criterion = CEL_Sigmoid(sample_weight)
 
-    param_groups = [{'params': model.module.finetune_params(), 'lr': args.lr_ft},
-                    {'params': model.module.fresh_params(), 'lr': args.lr_new}]
+    if torch.cuda.is_available():
+        param_groups = [{'params': model.module.finetune_params(), 'lr': args.lr_ft},
+                        {'params': model.module.fresh_params(), 'lr': args.lr_new}]
+    else:
+        param_groups = [{'params': model.finetune_params(), 'lr': args.lr_ft},
+                        {'params': model.fresh_params(), 'lr': args.lr_new}]
+
     optimizer = torch.optim.SGD(param_groups, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=False)
     lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
 
