@@ -121,6 +121,13 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
 
         print(f'Evaluation on test set, \n',
               'ma: {:.4f},  pos_recall: {:.4f} , neg_recall: {:.4f} \n'.format(
+                  train_result.ma, np.mean(train_result.label_pos_recall), np.mean(train_result.label_neg_recall)),
+              'Acc: {:.4f}, Prec: {:.4f}, Rec: {:.4f}, F1: {:.4f}'.format(
+                  train_result.instance_acc, train_result.instance_prec, train_result.instance_recall,
+                  train_result.instance_f1))
+
+        print(f'Evaluation on test set, \n',
+              'ma: {:.4f},  pos_recall: {:.4f} , neg_recall: {:.4f} \n'.format(
                   valid_result.ma, np.mean(valid_result.label_pos_recall), np.mean(valid_result.label_neg_recall)),
               'Acc: {:.4f}, Prec: {:.4f}, Rec: {:.4f}, F1: {:.4f}'.format(
                   valid_result.instance_acc, valid_result.instance_prec, valid_result.instance_recall,
