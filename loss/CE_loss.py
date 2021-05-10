@@ -24,8 +24,10 @@ class CEL_Sigmoid(nn.Module):
         targets_mask = torch.where(targets.detach().cpu() > 0.5, torch.ones(1), torch.zeros(1))
         if self.sample_weight is not None:
             weight = ratio2weight(targets_mask, self.sample_weight)
-            loss = (loss * weight.cuda())
-
+            if torch.cuda.is_available():
+                loss = (loss * weight.cuda())
+            else:
+                loss = (loss * weight)
         loss = loss.sum() / batch_size if self.size_average else loss.sum()
 
         return loss

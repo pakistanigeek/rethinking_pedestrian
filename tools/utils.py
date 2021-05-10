@@ -11,7 +11,7 @@ import numpy as np
 
 def time_str(fmt=None):
     if fmt is None:
-        fmt = '%Y-%m-%d_%H:%M:%S'
+        fmt = '%Y-%m-%d_%H_%M_%S'
 
     #     time.strftime(format[, t])
     return datetime.datetime.today().strftime(fmt)
