@@ -25,18 +25,18 @@ def batch_trainer(epoch, model, train_loader, criterion, optimizer):
         if torch.cuda.is_available():
             imgs, gt_label = imgs.cuda(), gt_label.cuda()
         train_logits = model(imgs, gt_label)
-        # train_loss = criterion(train_logits, gt_label)
+        train_loss = criterion(train_logits, gt_label)
         loss_list = []
         # deep supervision
-        for k in range(len(train_logits)):
-            out = train_logits[k]
-            loss_list.append(criterion(out, gt_label))
-
-        train_loss = sum(loss_list)
+        # for k in range(len(train_logits)):
+        #     out = train_logits[k]
+        #     loss_list.append(criterion(out, gt_label))
+        #
+        # train_loss = sum(loss_list)
         # maximum voting
         # train_logits = torch.max(train_logits[0], train_logits[1])
-        train_logits = train_logits[0].add(train_logits[1]).add(train_logits[2])
-        train_logits /= 3
+        # train_logits = train_logits[0].add(train_logits[1]).add(train_logits[2])
+        # train_logits /= 3
 
         train_loss.backward()
         clip_grad_norm_(model.parameters(), max_norm=12.0)  # make larger learning rate works
@@ -77,17 +77,17 @@ def valid_trainer(model, valid_loader, criterion):
             gt_list.append(gt_label.cpu().numpy())
             gt_label[gt_label == -1] = 0
             valid_logits = model(imgs)
-            # valid_loss = criterion(valid_logits, gt_label)
+            valid_loss = criterion(valid_logits, gt_label)
             loss_list = []
             # deep supervision
-            for k in range(len(valid_logits)):
-                out = valid_logits[k]
-                loss_list.append(criterion(out, gt_label))
-
-            valid_loss = sum(loss_list)
+            # for k in range(len(valid_logits)):
+            #     out = valid_logits[k]
+            #     loss_list.append(criterion(out, gt_label))
+            #
+            # valid_loss = sum(loss_list)
             # valid_logits = torch.max(valid_logits[0], valid_logits[1])
-            valid_logits = valid_logits[0].add(valid_logits[1]).add(valid_logits[2])
-            valid_logits /= 3
+            # valid_logits = valid_logits[0].add(valid_logits[1]).add(valid_logits[2])
+            # valid_logits /= 3
             valid_probs = torch.sigmoid(valid_logits)
             preds_probs.append(valid_probs.cpu().numpy())
             loss_meter.update(to_scalar(valid_loss))

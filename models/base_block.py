@@ -83,13 +83,13 @@ class BaseClassifier(nn.Module):
 
         num_classes = 35
         # self.st_3b = SpatialTransformBlock(num_classes, 25, 64*3)
-        self.st_4d = SpatialTransformBlock(num_classes, 25, 128*2)
-        self.st_5b = SpatialTransformBlock(num_classes, 12, 128)
+        # self.st_4d = SpatialTransformBlock(num_classes, 25, 128*2)
+        # self.st_5b = SpatialTransformBlock(num_classes, 12, 128)
         #
         # # Lateral layers
         # self.latlayer_3b = nn.Conv2d(320, 64, kernel_size=1, stride=1, padding=0)
-        self.latlayer_4d = nn.Conv2d(320, 128, kernel_size=1, stride=1, padding=0)
-        self.latlayer_5b = nn.Conv2d(1088, 128, kernel_size=1, stride=1, padding=0)
+        # self.latlayer_4d = nn.Conv2d(320, 128, kernel_size=1, stride=1, padding=0)
+        # self.latlayer_5b = nn.Conv2d(1088, 128, kernel_size=1, stride=1, padding=0)
 
     def fresh_params(self):
         return self.parameters()
@@ -98,23 +98,26 @@ class BaseClassifier(nn.Module):
         up_feat = F.interpolate(x, (H, W), mode='bilinear', align_corners=False)
         return torch.cat([up_feat,y], 1)
 
-    def forward(self, feature1, feature2, feature3):
+    # def forward(self, feature1, feature2, feature3):
+    def forward(self,feature3):
         x = self.avg_pool(feature3)
         x = x.view(x.size(0), -1)
         x = F.dropout(x, training=self.training)
         x = self.logits(x)
 
-        fusion_feature2 = self.latlayer_5b(feature2)
-        fusion_feature1 = self._upsample_add(fusion_feature2, self.latlayer_4d(feature1))
-
-        pred_5b = self.st_5b(fusion_feature2)
-        pred_4d = self.st_4d(fusion_feature1)
+        # fusion_feature2 = self.latlayer_5b(feature2)
+        # fusion_feature1 = self._upsample_add(fusion_feature2, self.latlayer_4d(feature1))
+        #
+        # pred_5b = self.st_5b(fusion_feature2)
+        # pred_4d = self.st_4d(fusion_feature1)
 
         # pred_3b = self.st_3b(fusion_3b)
 
         # fusion_3b = self._upsample_add(fusion_4d, self.latlayer_3b(mixed_5b))
 
-        return x, pred_5b, pred_4d
+        # return x, pred_5b, pred_4d
+
+        return x
 
 
 def initialize_weights(module):
@@ -149,10 +152,13 @@ class FeatClassifier(nn.Module):
 
     def forward(self, x, label=None):
         # feat_map,mixed_7a, mixed_6a, mixed_5b = self.backbone(x)
-        repeat, repeat_1, feat_map = self.backbone(x)
+        # repeat, repeat_1, feat_map = self.backbone(x)
+        feat_map = self.backbone(x)
 
-        logits = self.classifier(repeat, repeat_1,feat_map)
-
+        logits = self.classifier(feat_map)
+        # logits = self.classifier(repeat, repeat_1, feat_map)
         # return logits,pred_5b, pred_4d, pred_3b
 
-        return logits[0], logits[1], logits[2]
+        # return logits[0], logits[1], logits[2]
+
+        return logits

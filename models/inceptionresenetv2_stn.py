@@ -326,8 +326,8 @@ class InceptionResNetV2(nn.Module):
         repeat_2 = self.repeat_2(mixed_7a)
         x = self.block8(repeat_2)
         x = self.conv2d_7b(x)
-        return  repeat, repeat_1, x
-
+        # return  repeat, repeat_1, x
+        return x
     def logits(self, features):
         x = self.avgpool_1a(features)
         x = x.view(x.size(0), -1)
