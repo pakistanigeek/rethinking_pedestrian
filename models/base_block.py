@@ -52,7 +52,7 @@ class SpatialTransformBlock(nn.Module):
         theta[:,0,2] = torch.tanh(theta_i[:,2])
         theta[:,1,2] = torch.tanh(theta_i[:,3])
         theta = theta.cuda()
-        # return theta
+        return theta
 
     def forward(self, features):
         pred_list = []
