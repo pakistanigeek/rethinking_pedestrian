@@ -146,6 +146,6 @@ class FeatClassifier(nn.Module):
         return self.backbone.parameters()
 
     def forward(self, x, label=None):
-        feat_map1,feat_map2,feat_map3,feat_map4 = self.backbone(x)
-        logits1, logits2, logits3, logits4, logit5 = self.classifier((feat_map1, feat_map2, feat_map3,feat_map4))
-        return logits1, logits2, logits3, logits4, logit5
+        feat_map2,feat_map3,feat_map4 = self.backbone(x)
+        logits1, logits2, logits3, logits4 = self.classifier((feat_map2, feat_map3,feat_map4))
+        return logits1, logits2, logits3, logits4
