@@ -34,10 +34,9 @@ def batch_trainer(epoch, model, train_loader, criterion, optimizer):
             out = train_logits[k]
             loss_list.append(criterion(out, gt_label))
         train_loss = sum(loss_list)
-        # train_logits = train_logits[0].add(train_logits[1])
-        # train_logits /= 2
-        # train_logits = torch.max(torch.max(torch.max(torch.max(train_logits[0],train_logits[1]), train_logits[2]),train_logits[3]))
-        train_logits = torch.max(torch.max(torch.max(train_logits[0], train_logits[1]),train_logits[2]), train_logits[3])
+        train_logits = train_logits[0].add(train_logits[1]).add(train_logits[2]).add(train_logits[3])
+        train_logits /= 4
+        # train_logits = torch.max(torch.max(torch.max(train_logits[0], train_logits[1]),train_logits[2]), train_logits[3])
         train_loss.backward()
         clip_grad_norm_(model.parameters(), max_norm=10.0)  # make larger learning rate works
         optimizer.step()
@@ -85,9 +84,9 @@ def valid_trainer(model, valid_loader, criterion):
                 loss_list.append(criterion(out, gt_label))
             valid_loss = sum(loss_list)
 
-            # valid_logits = valid_logits[0].add(valid_logits[1])
-            # valid_logits /= 2
-            valid_logits = torch.max(torch.max(torch.max(valid_logits[0], valid_logits[1]),valid_logits[2]), valid_logits[3])
+            valid_logits = valid_logits[0].add(valid_logits[1]).add(valid_logits[2]).add(valid_logits[3])
+            valid_logits /= 4
+            # valid_logits = torch.max(torch.max(torch.max(valid_logits[0], valid_logits[1]),valid_logits[2]), valid_logits[3])
             valid_probs = torch.sigmoid(valid_logits)
             preds_probs.append(valid_probs.cpu().numpy())
             loss_meter.update(to_scalar(valid_loss))
