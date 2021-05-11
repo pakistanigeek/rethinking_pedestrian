@@ -10,6 +10,8 @@ import torchvision.models.resnet
 __all__ = ['ResNet', 'resnet18', 'resnet34', 'resnet50', 'resnet101',
            'resnet152', 'resnext50_32x4d', 'resnext101_32x8d']
 
+from models.bam import BAM
+
 model_urls = {
     'resnet18': 'https://download.pytorch.org/models/resnet18-5c106cde.pth',
     'resnet34': 'https://download.pytorch.org/models/resnet34-333f7ec4.pth',
@@ -145,6 +147,11 @@ class ResNet(nn.Module):
                                bias=False)
         self.bn1 = norm_layer(self.inplanes)
         self.relu = nn.ReLU(inplace=True)
+
+        self.bam1 = BAM(64 * block.expansion)
+        self.bam2 = BAM(128 * block.expansion)
+        self.bam3 = BAM(256 * block.expansion)
+
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
         self.layer1 = self._make_layer(block, 64, layers[0])
         self.layer2 = self._make_layer(block, 128, layers[1], stride=2,
@@ -205,8 +212,14 @@ class ResNet(nn.Module):
         x = self.maxpool(x)
 
         x = self.layer1(x)
+        if not self.bam1 is None:
+            x = self.bam1(x)
         x = self.layer2(x)
+        if not self.bam2 is None:
+            x = self.bam2(x)
         x = self.layer3(x)
+        if not self.bam3 is None:
+            x = self.bam3(x)
         x = self.layer4(x)
 
         return x
@@ -222,7 +235,7 @@ def _resnet(arch, block, layers, pretrained, progress, **kwargs):
     if pretrained:
         state_dict = load_state_dict_from_url(model_urls[arch],
                                               progress=progress)
-        model.load_state_dict(remove_fc(state_dict))
+        model.load_state_dict(remove_fc(state_dict), strict=False)
     return model
 
 
