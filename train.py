@@ -12,7 +12,8 @@ from config import argument_parser
 from dataset.AttrDataset import AttrDataset, get_transform
 from loss.CE_loss import CEL_Sigmoid
 from models.base_block import FeatClassifier, BaseClassifier
-from models.resnet import resnet50
+from models.cbamresnet import cbam_resnet50
+from models.resnet_org import resnet50
 from tools.function import get_model_log_path, get_pedestrian_metrics
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed
 
@@ -65,15 +66,17 @@ def main(args):
     labels = train_set.label
     sample_weight = labels.mean(0)
 
-    backbone = resnet50()
+    # backbone = cbam_resnet50(pretrained=True)
+    backbone = cbam_resnet50()
+    # backbone = resnet50()
 
-    ct = 0
-    for child in backbone.children():
-        ct += 1
-        if ct < 5:
-            print(child._get_name())
-            for param in child.parameters():
-                param.requires_grad = False
+    # ct = 0
+    # for child in backbone.children():
+    #     ct += 1
+    #     if ct < 5:
+    #         print(child._get_name())
+    #         for param in child.parameters():
+    #             param.requires_grad = False
 
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
