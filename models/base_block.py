@@ -42,8 +42,9 @@ class SpatialTransformBlock(nn.Module):
     def stn(self, x, theta):
         grid = F.affine_grid(theta, x.size())
         x = F.grid_sample(x, grid, padding_mode='border')
-        return x.cuda()
-        # return x
+        if torch.cuda.is_available():
+            return x.cuda()
+        return x
 
     def transform_theta(self, theta_i, region_idx):
         theta = torch.zeros(theta_i.size(0), 2, 3)
@@ -51,7 +52,8 @@ class SpatialTransformBlock(nn.Module):
         theta[:,1,1] = torch.sigmoid(theta_i[:,1])
         theta[:,0,2] = torch.tanh(theta_i[:,2])
         theta[:,1,2] = torch.tanh(theta_i[:,3])
-        theta = theta.cuda()
+        if torch.cuda.is_available():
+            theta = theta.cuda()
         return theta
 
     def forward(self, features):
@@ -81,13 +83,11 @@ class BaseClassifier(nn.Module):
 
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
 
-        self.st_1 = SpatialTransformBlock(nattr, (64,48), 256 * 4)
         self.st_2 = SpatialTransformBlock(nattr, (32, 24), 256 * 3)
         self.st_3 = SpatialTransformBlock(nattr, (16,12), 256 * 2)
         self.st_4 = SpatialTransformBlock(nattr, (8,6), 256)
 
         # Lateral layers
-        self.latlayer_1 = nn.Conv2d(256, 256, kernel_size=1, stride=1, padding=0)
         self.latlayer_2 = nn.Conv2d(512, 256, kernel_size=1, stride=1, padding=0)
         self.latlayer_3 = nn.Conv2d(1024, 256, kernel_size=1, stride=1, padding=0)
         self.latlayer_4 = nn.Conv2d(2048, 256, kernel_size=1, stride=1, padding=0)
@@ -101,20 +101,19 @@ class BaseClassifier(nn.Module):
         return torch.cat([up_feat,y], 1)
 
     def forward(self, feature):
-        feature1,feature2,feature3,feature4 = feature
+        feature2,feature3,feature4 = feature
         feat = self.avg_pool(feature4).view(feature4.size(0), -1)
         pred_main = self.logits(feat)
 
         fusion_4 = self.latlayer_4(feature4)
         fusion_3 = self._upsample_add(fusion_4, self.latlayer_3(feature3))
         fusion_2 = self._upsample_add(fusion_3, self.latlayer_2(feature2))
-        fusion_1 = self._upsample_add(fusion_2, self.latlayer_1(feature1))
 
-        pred_1 = self.st_1(fusion_1)
         pred_2 = self.st_2(fusion_2)
         pred_3 = self.st_3(fusion_3)
         pred_4 = self.st_4(fusion_4)
-        return pred_main,pred_1,pred_2,pred_3,pred_4
+
+        return pred_main,pred_2,pred_3,pred_4
 
 
 def initialize_weights(module):

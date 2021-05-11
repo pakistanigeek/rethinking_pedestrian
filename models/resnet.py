@@ -209,7 +209,7 @@ class ResNet(nn.Module):
         layer3 = self.layer3(layer2)
         layer4 = self.layer4(layer3)
 
-        return layer1,layer2,layer3,layer4
+        return layer2,layer3,layer4
 
 
 def remove_fc(state_dict):
