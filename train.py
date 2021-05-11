@@ -66,6 +66,15 @@ def main(args):
     sample_weight = labels.mean(0)
 
     backbone = resnet50()
+
+    ct = 0
+    for child in backbone.children():
+        ct += 1
+        if ct < 5:
+            print(child._get_name())
+            for param in child.parameters():
+                param.requires_grad = False
+
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
 
