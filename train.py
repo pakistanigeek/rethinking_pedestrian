@@ -12,6 +12,7 @@ from batch_engine import valid_trainer, batch_trainer
 from config import argument_parser
 from dataset.AttrDataset import AttrDataset, get_transform
 from loss.CE_loss import CEL_Sigmoid
+from models.bamresnet import bam_resnet50
 from models.base_block import FeatClassifier, BaseClassifier
 from models.cbamresnet import cbam_resnet50
 from models.resnet_org import resnet50
@@ -68,7 +69,8 @@ def main(args):
     sample_weight = labels.mean(0)
 
     # backbone = cbam_resnet50(pretrained=True)
-    backbone = cbam_resnet50()
+    # backbone = cbam_resnet50()
+    backbone = bam_resnet50()
     # backbone = resnet50()
 
     # ct = 0
