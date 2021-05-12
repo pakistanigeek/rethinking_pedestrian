@@ -1,4 +1,5 @@
 import os
+import pickle
 import pprint
 from collections import OrderedDict, defaultdict
 
@@ -14,8 +15,8 @@ from loss.CE_loss import CEL_Sigmoid
 from models.base_block import FeatClassifier, BaseClassifier
 from models.cbamresnet import cbam_resnet50
 from models.resnet_org import resnet50
-from tools.function import get_model_log_path, get_pedestrian_metrics
-from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed
+from tools.function import get_model_log_path, get_pedestrian_metrics, get_pkl_rootpath
+from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed, print_label_metrics
 
 set_seed(605)
 
@@ -136,7 +137,7 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
         train_result = get_pedestrian_metrics(train_gt, train_probs)
         valid_result = get_pedestrian_metrics(valid_gt, valid_probs)
 
-        print(f'Evaluation on test set, \n',
+        print(f'Evaluation on train set, \n',
               'ma: {:.4f},  pos_recall: {:.4f} , neg_recall: {:.4f} \n'.format(
                   train_result.ma, np.mean(train_result.label_pos_recall), np.mean(train_result.label_neg_recall)),
               'Acc: {:.4f}, Prec: {:.4f}, Rec: {:.4f}, F1: {:.4f}'.format(
@@ -149,6 +150,11 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
               'Acc: {:.4f}, Prec: {:.4f}, Rec: {:.4f}, F1: {:.4f}'.format(
                   valid_result.instance_acc, valid_result.instance_prec, valid_result.instance_recall,
                   valid_result.instance_f1))
+
+        data_path = get_pkl_rootpath(args.dataset)
+        dataset_info = pickle.load(open(data_path, 'rb+'))
+
+        print_label_metrics(dataset_info.attr_name, valid_result["label_ma"])
 
         print(f'{time_str()}')
         print('-' * 60)

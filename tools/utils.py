@@ -435,3 +435,8 @@ class data_prefetcher():
         target = self.next_target
         self.preload()
         return input, target
+
+def print_label_metrics(labels, metrics):
+
+    for i in range(0,len(labels)):
+        print( labels[i] + " : " + str(metrics[i]))
