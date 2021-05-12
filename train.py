@@ -15,6 +15,7 @@ from loss.CE_loss import CEL_Sigmoid
 from models.bamresnet import bam_resnet50
 from models.base_block import FeatClassifier, BaseClassifier
 from models.cbamresnet import cbam_resnet50
+from models.efficientnet import efficientnet_b8c
 from models.resnet_org import resnet50
 from tools.function import get_model_log_path, get_pedestrian_metrics, get_pkl_rootpath
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed, print_label_metrics
@@ -70,7 +71,8 @@ def main(args):
 
     # backbone = cbam_resnet50(pretrained=True)
     # backbone = cbam_resnet50()
-    backbone = bam_resnet50()
+    # backbone = bam_resnet50()
+    backbone = efficientnet_b8c()
     # backbone = resnet50()
 
     # ct = 0
