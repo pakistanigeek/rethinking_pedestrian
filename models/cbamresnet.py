@@ -37,14 +37,12 @@ class MLP(nn.Module):
         self.fc2 = nn.Linear(
             in_features=mid_channels,
             out_features=channels)
-        self.bn = nn.BatchNorm2d()
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
         x = self.fc1(x)
         x = self.activ(x)
         x = self.fc2(x)
-        x = self.bn(x)
         return x
 
 
@@ -173,8 +171,10 @@ class CbamResUnit(nn.Module):
                 activation=None)
         self.cbam = CbamBlock(channels=out_channels)
         self.activ = nn.ReLU(inplace=True)
+        self.bn = nn.BatchNorm2d(num_features=in_channels)
 
     def forward(self, x):
+        x = self.bn(x)
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
