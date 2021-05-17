@@ -780,7 +780,7 @@ def load_model(net,
         pretrained_state = torch.load(file_path)
         model_dict = net.state_dict()
         pretrained_state = {k: v for k, v in pretrained_state.items() if k in model_dict}
-        net.load_state_dict(pretrained_state)
+        net.load_state_dict(pretrained_state,strict=False)
     else:
         net.load_state_dict(torch.load(file_path))
 
