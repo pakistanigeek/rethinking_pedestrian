@@ -29,7 +29,8 @@ class AttrDataset(data.Dataset):
         self.transform = transform
         self.target_transform = target_transform
 
-        self.root_path = dataset_info.root
+        # self.root_path = dataset_info.root
+        self.root_path = os.getcwd() + "/data/PETA/images"
 
         self.attr_id = dataset_info.attr_name
         self.attr_num = len(self.attr_id)
