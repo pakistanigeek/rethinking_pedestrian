@@ -68,7 +68,7 @@ def main(args):
     sample_weight = labels.mean(0)
 
     # backbone = cbam_resnet50(pretrained=True)
-    backbone = cbam_resnet50()
+    backbone = cbam_resnet50(pretrained=True)
     # backbone = resnet50()
 
     # ct = 0
