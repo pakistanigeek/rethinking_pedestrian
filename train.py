@@ -139,7 +139,7 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
             writer=writer
         )
 
-        lr_scheduler.step()
+        lr_scheduler.step(metrics=valid_loss, epoch=i)
 
         train_result = get_pedestrian_metrics(train_gt, train_probs)
         valid_result = get_pedestrian_metrics(valid_gt, valid_probs)
