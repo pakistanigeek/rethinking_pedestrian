@@ -8,7 +8,7 @@ from tqdm import tqdm
 from tools.utils import AverageMeter, to_scalar, time_str
 
 
-def batch_trainer(epoch, model, train_loader, criterion, optimizer):
+def batch_trainer(epoch, model, train_loader, criterion, optimizer,writer):
     model.train()
     epoch_time = time.time()
     loss_meter = AverageMeter()
@@ -54,7 +54,7 @@ def batch_trainer(epoch, model, train_loader, criterion, optimizer):
 
 
 # @torch.no_grad()
-def valid_trainer(model, valid_loader, criterion):
+def valid_trainer(model, valid_loader, criterion, writer):
     model.eval()
     loss_meter = AverageMeter()
 
