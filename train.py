@@ -15,6 +15,8 @@ from models.base_block import FeatClassifier, BaseClassifier
 from models.resnet import resnet50
 from tools.function import get_model_log_path, get_pedestrian_metrics
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed
+from torch.utils.tensorboard import SummaryWriter
+
 
 set_seed(605)
 
@@ -74,10 +76,16 @@ def main(args):
 
     criterion = CEL_Sigmoid(sample_weight)
 
-    param_groups = [{'params': model.module.finetune_params(), 'lr': args.lr_ft},
-                    {'params': model.module.fresh_params(), 'lr': args.lr_new}]
+    if torch.cuda.is_available():
+       param_groups = [{'params': model.module.finetune_params(), 'lr': args.lr_ft},
+                        {'params': model.module.fresh_params(), 'lr': args.lr_new}]
+    else:
+        param_groups = [{'params': model.finetune_params(), 'lr': args.lr_ft},
+                        {'params': model.fresh_params(), 'lr': args.lr_new}]
     optimizer = torch.optim.SGD(param_groups, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=False)
     lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
+    train_writer = SummaryWriter(f'exp_result/{args.dataset}/tensorboard/train')
+    valid_writer = SummaryWriter(f'exp_result/{args.dataset}/tensorboard/valid')
 
     best_metric, epoch = trainer(epoch=args.train_epoch,
                                  model=model,
@@ -86,13 +94,14 @@ def main(args):
                                  criterion=criterion,
                                  optimizer=optimizer,
                                  lr_scheduler=lr_scheduler,
-                                 path=save_model_path)
+                                 path=save_model_path, writer = [train_writer, valid_writer])
 
     print(f'{visenv_name},  best_metrc : {best_metric} in epoch{epoch}')
-
+    train_writer.close()
+    valid_writer.close()
 
 def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_scheduler,
-            path):
+            path, writer):
     maximum = float(-np.inf)
     best_epoch = 0
 
@@ -106,18 +115,35 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
             train_loader=train_loader,
             criterion=criterion,
             optimizer=optimizer,
+            writer=writer
         )
 
         valid_loss, valid_gt, valid_probs = valid_trainer(
             model=model,
             valid_loader=valid_loader,
             criterion=criterion,
+            writer=writer
         )
 
         lr_scheduler.step(metrics=valid_loss, epoch=i)
 
         train_result = get_pedestrian_metrics(train_gt, train_probs)
         valid_result = get_pedestrian_metrics(valid_gt, valid_probs)
+
+        writer[0].add_scalar("Mean Accuracy", train_result.ma, global_step=i)
+        writer[0].add_scalar("Instance Accuracy", train_result.instance_acc, global_step=i)
+        writer[0].add_scalar("Loss", train_result.ma, global_step=i)
+
+        writer[1].add_scalar("Mean Accuracy", valid_result.ma, global_step=i)
+        writer[1].add_scalar("Instance Accuracy", valid_result.instance_acc, global_step=i)
+        writer[1].add_scalar("Loss", valid_result.ma, global_step=i)
+
+        print(f'Evaluation on train set, \n',
+              'ma: {:.4f},  pos_recall: {:.4f} , neg_recall: {:.4f} \n'.format(
+                  train_result.ma, np.mean(train_result.label_pos_recall), np.mean(train_result.label_neg_recall)),
+              'Acc: {:.4f}, Prec: {:.4f}, Rec: {:.4f}, F1: {:.4f}'.format(
+                  train_result.instance_acc, train_result.instance_prec, train_result.instance_recall,
+                  train_result.instance_f1))
 
         print(f'Evaluation on test set, \n',
               'ma: {:.4f},  pos_recall: {:.4f} , neg_recall: {:.4f} \n'.format(
