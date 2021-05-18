@@ -171,6 +171,7 @@ class CbamResUnit(nn.Module):
                 activation=None)
         self.cbam = CbamBlock(channels=out_channels)
         self.activ = nn.ReLU(inplace=True)
+        self.dropout = nn.Dropout(p=.20)
 
     def forward(self, x):
         if self.resize_identity:
@@ -181,6 +182,7 @@ class CbamResUnit(nn.Module):
         x = self.cbam(x)
         x = x + identity
         x = self.activ(x)
+        x = self.dropout(x)
         return x
 
 
