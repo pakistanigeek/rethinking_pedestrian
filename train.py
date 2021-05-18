@@ -5,7 +5,7 @@ from collections import OrderedDict, defaultdict
 
 import numpy as np
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau
+from torch.optim.lr_scheduler import ReduceLROnPlateau, MultiStepLR
 from torch.utils.data import DataLoader
 
 from batch_engine import valid_trainer, batch_trainer
@@ -95,7 +95,8 @@ def main(args):
                         {'params': model.fresh_params(), 'lr': args.lr_new}]
 
     optimizer = torch.optim.SGD(param_groups, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=False)
-    lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
+    # lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
+    lr_scheduler = MultiStepLR(optimizer, milestones=[6,12,18,24], gamma=0.1)
 
     best_metric, epoch = trainer(epoch=args.train_epoch,
                                  model=model,
@@ -132,7 +133,7 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
             criterion=criterion,
         )
 
-        lr_scheduler.step(metrics=valid_loss, epoch=i)
+        lr_scheduler.step()
 
         train_result = get_pedestrian_metrics(train_gt, train_probs)
         valid_result = get_pedestrian_metrics(valid_gt, valid_probs)
