@@ -171,10 +171,8 @@ class CbamResUnit(nn.Module):
                 activation=None)
         self.cbam = CbamBlock(channels=out_channels)
         self.activ = nn.ReLU(inplace=True)
-        self.bn = nn.BatchNorm2d(num_features=in_channels)
 
     def forward(self, x):
-        x = self.bn(x)
         if self.resize_identity:
             identity = self.identity_conv(x)
         else:
@@ -232,13 +230,6 @@ class CbamResNet(nn.Module):
                     bottleneck=bottleneck))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-        # self.features.add_module("final_pool", nn.AvgPool2d(
-        #     kernel_size=7,
-        #     stride=1))
-        #
-        # self.output = nn.Linear(
-        #     in_features=in_channels,
-        #     out_features=num_classes)
 
         self._init_params()
 
@@ -251,8 +242,6 @@ class CbamResNet(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        # x = x.view(x.size(0), -1)
-        # x = self.output(x)
         return x
 
 
