@@ -29,7 +29,7 @@ def batch_trainer(epoch, model, train_loader, criterion, optimizer,writer):
         train_loss = criterion(train_logits, gt_label)
 
         train_loss.backward()
-        clip_grad_norm_(model.parameters(), max_norm=10.0)  # make larger learning rate works
+        # clip_grad_norm_(model.parameters(), max_norm=10.0)  # make larger learning rate works
         optimizer.step()
         optimizer.zero_grad()
         loss_meter.update(to_scalar(train_loss))
