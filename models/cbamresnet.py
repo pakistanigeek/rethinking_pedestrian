@@ -170,8 +170,7 @@ class CbamResUnit(nn.Module):
                 stride=stride,
                 activation=None)
         self.cbam = CbamBlock(channels=out_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.dropout = nn.Dropout(p=.20)
+        self.activ = nn.LeakyReLU(inplace=True)
 
     def forward(self, x):
         if self.resize_identity:
@@ -182,7 +181,6 @@ class CbamResUnit(nn.Module):
         x = self.cbam(x)
         x = x + identity
         x = self.activ(x)
-        x = self.dropout(x)
         return x
 
 
@@ -232,7 +230,7 @@ class CbamResNet(nn.Module):
                     bottleneck=bottleneck))
                 in_channels = out_channels
             self.features.add_module("stage{}".format(i + 1), stage)
-
+        self.dropout = nn.Dropout(p=.30)
         self._init_params()
 
     def _init_params(self):
@@ -244,6 +242,7 @@ class CbamResNet(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
+        # x = self.dropout(x)
         return x
 
 

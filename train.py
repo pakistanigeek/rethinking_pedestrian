@@ -96,8 +96,8 @@ def main(args):
                         {'params': model.fresh_params(), 'lr': args.lr_new}]
 
     optimizer = torch.optim.SGD(param_groups, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=False)
-    # lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
-    lr_scheduler = MultiStepLR(optimizer, milestones=[10,20,30,40,50,60,70,80,90,100], gamma=0.1)
+    lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
+    # lr_scheduler = MultiStepLR(optimizer, milestones=[10,20,30,40,50,60,70,80,90,100], gamma=0.1)
     train_writer = SummaryWriter(f'exp_result/{args.dataset}/tensorboard/train')
     valid_writer = SummaryWriter(f'exp_result/{args.dataset}/tensorboard/valid')
 
@@ -139,8 +139,8 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
             writer=writer
         )
 
-        # lr_scheduler.step(metrics=valid_loss, epoch=i)
-        lr_scheduler.step(epoch=i)
+        lr_scheduler.step(metrics=valid_loss, epoch=i)
+        # lr_scheduler.step(epoch=i)
         train_result = get_pedestrian_metrics(train_gt, train_probs)
         valid_result = get_pedestrian_metrics(valid_gt, valid_probs)
 
