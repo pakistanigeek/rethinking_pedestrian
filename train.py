@@ -14,6 +14,7 @@ from dataset.AttrDataset import AttrDataset, get_transform
 from loss.CE_loss import CEL_Sigmoid
 from models.base_block import FeatClassifier, BaseClassifier
 from models.cbamresnet import cbam_resnet50
+from models.bamresnet import bam_resnet50
 from tools.function import get_model_log_path, get_pedestrian_metrics, get_pkl_rootpath
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed, print_label_metrics
 from torch.utils.tensorboard import SummaryWriter
@@ -69,8 +70,9 @@ def main(args):
     sample_weight = labels.mean(0)
 
     # backbone = cbam_resnet50(pretrained=True)
-    backbone = cbam_resnet50(pretrained=True)
+    # backbone = cbam_resnet50(pretrained=True)
     # backbone = resnet50()
+    backbone = bam_resnet50(pretrained = False)
 
     # ct = 0
     # for child in backbone.children():
