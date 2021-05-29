@@ -244,7 +244,7 @@ class CbamResNet(nn.Module):
 
     def forward(self, x):
         x = self.features(x)
-        x = self.dropout(x)
+        # x = self.dropout(x)
         return x
 
 
