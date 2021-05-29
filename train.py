@@ -72,15 +72,14 @@ def main(args):
     # backbone = cbam_resnet50(pretrained=True)
     # backbone = cbam_resnet50(pretrained=True)
     # backbone = resnet50()
-    backbone = bam_resnet50(pretrained = False)
+    backbone = bam_resnet50(pretrained = True)
 
-    # ct = 0
-    # for child in backbone.children():
-    #     ct += 1
-    #     if ct < 5:
-    #         print(child._get_name())
-    #         for param in child.parameters():
-    #             param.requires_grad = False
+    ct = 0
+    for child in backbone.features.children():
+        ct += 1
+        print(child._get_name())
+        for param in child.parameters():
+            param.requires_grad = False
 
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
@@ -99,7 +98,7 @@ def main(args):
 
     optimizer = torch.optim.SGD(param_groups, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
     # lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
-    lr_scheduler = MultiStepLR(optimizer, milestones=[10,20,30,40,50,60,70,80,90,100], gamma=0.1)
+    lr_scheduler = MultiStepLR(optimizer, milestones=[10,20,30], gamma=0.1)
     train_writer = SummaryWriter(f'exp_result/{args.dataset}/tensorboard/train')
     valid_writer = SummaryWriter(f'exp_result/{args.dataset}/tensorboard/valid')
 
@@ -124,6 +123,14 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
     result_list = defaultdict()
 
     for i in range(epoch):
+
+        if i == 5:
+            ct = 0
+            for child in model.backbone.features.children():
+                ct += 1
+                print(child._get_name())
+                for param in child.parameters():
+                    param.requires_grad = True
 
         train_loss, train_gt, train_probs = batch_trainer(
             epoch=i,
