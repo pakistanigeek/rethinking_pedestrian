@@ -70,16 +70,17 @@ def main(args):
     sample_weight = labels.mean(0)
 
     # backbone = cbam_resnet50(pretrained=True)
-    # backbone = cbam_resnet50(pretrained=True)
+    backbone = cbam_resnet50(pretrained=True)
     # backbone = resnet50()
-    backbone = bam_resnet50(pretrained = True)
+    # backbone = bam_resnet50(pretrained = True)
 
     ct = 0
     for child in backbone.features.children():
         ct += 1
-        print(child._get_name())
-        for param in child.parameters():
-            param.requires_grad = False
+        if ct <= 1:
+            print(child._get_name())
+            for param in child.parameters():
+                param.requires_grad = False
 
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
@@ -123,14 +124,6 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
     result_list = defaultdict()
 
     for i in range(epoch):
-
-        if i == 5:
-            ct = 0
-            for child in model.backbone.features.children():
-                ct += 1
-                print(child._get_name())
-                for param in child.parameters():
-                    param.requires_grad = True
 
         train_loss, train_gt, train_probs = batch_trainer(
             epoch=i,
