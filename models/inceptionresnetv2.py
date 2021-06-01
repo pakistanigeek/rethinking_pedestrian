@@ -469,11 +469,11 @@ def inceptionresnetv2(num_classes=1000, pretrained='imagenet'):
         # print(os.getcwd())
         # model.load_state_dict(torch.load('./models/inceptionresnetv2-520b38e4.pth'), strict=False)
 
-        if pretrained == 'imagenet':
-            new_last_linear = nn.Linear(1536, 1000)
-            new_last_linear.weight.data = model.last_linear.weight.data[1:]
-            new_last_linear.bias.data = model.last_linear.bias.data[1:]
-            model.last_linear = new_last_linear
+        # if pretrained == 'imagenet':
+        #     new_last_linear = nn.Linear(1536, 1000)
+        #     new_last_linear.weight.data = model.last_linear.weight.data[1:]
+        #     new_last_linear.bias.data = model.last_linear.bias.data[1:]
+        #     model.last_linear = new_last_linear
 
         model.input_space = settings['input_space']
         model.input_size = settings['input_size']

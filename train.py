@@ -72,7 +72,7 @@ def main(args):
     # backbone = cbam_resnet50(pretrained=True)
     # backbone = resnet50()
     # backbone = bam_resnet50(pretrained = True)
-    backbone = inceptionresnetv2(pretrained=True)
+    backbone = inceptionresnetv2(pretrained=None)
 
     # ct = 0
     # for child in backbone.features.children():
