@@ -69,10 +69,10 @@ def main(args):
     labels = train_set.label
     sample_weight = labels.mean(0)
 
-    # backbone = cbam_resnet50(pretrained=True)
+    backbone = cbam_resnet50(pretrained=True)
     # backbone = resnet50()
     # backbone = bam_resnet50(pretrained = True)
-    backbone = inceptionresnetv2(pretrained=None)
+    # backbone = inceptionresnetv2(pretrained=None)
 
     # ct = 0
     # for child in backbone.features.children():
@@ -84,11 +84,6 @@ def main(args):
 
     classifier = BaseClassifier(nattr=train_set.attr_num)
     model = FeatClassifier(backbone, classifier)
-
-    macs, params = get_model_complexity_info(model, (3, 299, 299), as_strings=True,
-                                             print_per_layer_stat=True, verbose=True)
-    print('{:<30}  {:<8}'.format('Computational complexity: ', macs))
-    print('{:<30}  {:<8}'.format('Number of parameters: ', params))
 
     if torch.cuda.is_available():
         model = torch.nn.DataParallel(model).cuda()
