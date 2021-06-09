@@ -141,3 +141,10 @@ def get_pedestrian_metrics(gt_label, preds_probs, threshold=0.5):
     result.error_num, result.fn_num, result.fp_num = false_pos + false_neg, false_neg, false_pos
 
     return result
+
+def get_reload_weight(model_path, model):
+    model_path += "/ckpt_max.pth"
+
+    checkpoint = torch.load(model_path, map_location=torch.device('cuda'))
+    model.load_state_dict(checkpoint['state_dicts'])
+    return model
