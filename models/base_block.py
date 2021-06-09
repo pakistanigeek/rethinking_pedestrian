@@ -17,8 +17,8 @@ class BaseClassifier(nn.Module):
         return self.parameters()
 
     def forward(self, feature):
-        feat = self.avg_pool(feature).view(feature.size(0), -1)
-        x = self.logits(feat)
+        # feat = self.avg_pool(feature).view(feature.size(0), -1)
+        x = self.logits(feature)
         return x
 
 
