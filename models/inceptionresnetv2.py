@@ -376,12 +376,12 @@ class InceptionResNetV2(nn.Module):
             Block35(scale=0.17),
             Block35(scale=0.17),
             Block35(scale=0.17),
-            # Block35(scale=0.17),
-            # Block35(scale=0.17),
-            # Block35(scale=0.17),
-            # Block35(scale=0.17),
-            # Block35(scale=0.17),
-            # Block35(scale=0.17)
+            Block35(scale=0.17),
+            Block35(scale=0.17),
+            Block35(scale=0.17),
+            Block35(scale=0.17),
+            Block35(scale=0.17),
+            Block35(scale=0.17)
         )
         self.mixed_6a = Mixed_6a()
         self.repeat_1 = nn.Sequential(
@@ -391,20 +391,20 @@ class InceptionResNetV2(nn.Module):
             Block17(scale=0.10),
             Block17(scale=0.10),
             Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10),
-            # Block17(scale=0.10)
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10),
+            Block17(scale=0.10)
         )
         self.mixed_7a = Mixed_7a()
         self.repeat_2 = nn.Sequential(
@@ -412,11 +412,11 @@ class InceptionResNetV2(nn.Module):
             Block8(scale=0.20),
             Block8(scale=0.20),
             Block8(scale=0.20),
-            # Block8(scale=0.20),
-            # Block8(scale=0.20),
-            # Block8(scale=0.20),
-            # Block8(scale=0.20),
-            # Block8(scale=0.20)
+            Block8(scale=0.20),
+            Block8(scale=0.20),
+            Block8(scale=0.20),
+            Block8(scale=0.20),
+            Block8(scale=0.20)
         )
         self.block8 = Block8(noReLU=True)
         self.conv2d_7b = BasicConv2d(2080, 1536, kernel_size=1, stride=1)
@@ -450,7 +450,7 @@ class InceptionResNetV2(nn.Module):
 
     def forward(self, input):
         x = self.features(input)
-        x = self.logits(x)
+        # x = self.logits(x)
         return x
 
 def inceptionresnetv2(num_classes=1000, pretrained='imagenet'):

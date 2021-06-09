@@ -69,10 +69,10 @@ def main(args):
     labels = train_set.label
     sample_weight = labels.mean(0)
 
-    backbone = cbam_resnet50(pretrained=True)
+    # backbone = cbam_resnet50(pretrained=True)
     # backbone = resnet50()
     # backbone = bam_resnet50(pretrained = True)
-    # backbone = inceptionresnetv2(pretrained=None)
+    backbone = inceptionresnetv2()
 
     # ct = 0
     # for child in backbone.features.children():
@@ -83,6 +83,33 @@ def main(args):
     #             param.requires_grad = False
 
     classifier = BaseClassifier(nattr=train_set.attr_num)
+    #
+    # for child in backbone.children():
+    #         print(child._get_name())
+    #         for param in child.parameters():
+    #             param.requires_grad = False
+    #
+    # # enable training for spatial block
+    # for child in backbone.layer1.named_children():
+    #         for param in child[1].sp_gate.parameters():
+    #             param.requires_grad = True
+    #
+    # for child in backbone.layer2.named_children():
+    #         for param in child[1].sp_gate.parameters():
+    #             param.requires_grad = True
+    #
+    # for child in backbone.layer3.named_children():
+    #         for param in child[1].sp_gate.parameters():
+    #             param.requires_grad = True
+    #
+    # for child in backbone.layer4.named_children():
+    #         for param in child[1].sp_gate.parameters():
+    #             param.requires_grad = True
+    #
+    # # disable training for classifier
+    #
+    #
+
     model = FeatClassifier(backbone, classifier)
 
     if torch.cuda.is_available():
@@ -98,8 +125,8 @@ def main(args):
                         {'params': model.fresh_params(), 'lr': args.lr_new}]
 
     optimizer = torch.optim.SGD(param_groups, momentum=args.momentum, weight_decay=args.weight_decay, nesterov=True)
-    # lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
-    lr_scheduler = MultiStepLR(optimizer, milestones=[8,14,20,25], gamma=0.1)
+    lr_scheduler = ReduceLROnPlateau(optimizer, factor=0.1, patience=4)
+    # lr_scheduler = MultiStepLR(optimizer, milestones=[8,14,20,25], gamma=0.1)
     train_writer = SummaryWriter(f'exp_result/{args.dataset}/tensorboard/train')
     valid_writer = SummaryWriter(f'exp_result/{args.dataset}/tensorboard/valid')
 
