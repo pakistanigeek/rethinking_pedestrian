@@ -31,122 +31,6 @@ pretrained_settings = {
     }
 }
 
-
-class MLP(nn.Module):
-    """
-    Multilayer perceptron block.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    reduction_ratio : int, default 16
-        Channel reduction ratio.
-    """
-    def __init__(self,
-                 channels,
-                 reduction_ratio=16):
-        super(MLP, self).__init__()
-        mid_channels = channels // reduction_ratio
-
-        self.fc1 = nn.Linear(
-            in_features=channels,
-            out_features=mid_channels)
-        self.activ = nn.ReLU(inplace=True)
-        self.fc2 = nn.Linear(
-            in_features=mid_channels,
-            out_features=channels)
-
-    def forward(self, x):
-        x = x.view(x.size(0), -1)
-        x = self.fc1(x)
-        x = self.activ(x)
-        x = self.fc2(x)
-        return x
-
-
-class ChannelGate(nn.Module):
-    """
-    CBAM channel gate block.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    reduction_ratio : int, default 16
-        Channel reduction ratio.
-    """
-    def __init__(self,
-                 channels,
-                 reduction_ratio=16):
-        super(ChannelGate, self).__init__()
-
-        self.avg_pool = nn.AdaptiveAvgPool2d(output_size=(1, 1))
-        self.max_pool = nn.AdaptiveMaxPool2d(output_size=(1, 1))
-        self.mlp = MLP(
-            channels=channels,
-            reduction_ratio=reduction_ratio)
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, x):
-        att1 = self.avg_pool(x)
-        att1 = self.mlp(att1)
-        att2 = self.max_pool(x)
-        att2 = self.mlp(att2)
-        att = att1 + att2
-        att = self.sigmoid(att)
-        att = att.unsqueeze(2).unsqueeze(3).expand_as(x)
-        x = x * att
-        return x
-
-
-class SpatialGate(nn.Module):
-    """
-    CBAM spatial gate block.
-    """
-    def __init__(self):
-        super(SpatialGate, self).__init__()
-        self.conv = conv7x7_block(
-            in_channels=2,
-            out_channels=1,
-            activation=None)
-        self.sigmoid = nn.Sigmoid()
-
-    def forward(self, x):
-        att1 = x.max(dim=1)[0].unsqueeze(1)
-        att2 = x.mean(dim=1).unsqueeze(1)
-        att = torch.cat((att1, att2), dim=1)
-        att = self.conv(att)
-        att = self.sigmoid(att)
-        x = x * att
-        return x
-
-
-class CbamBlock(nn.Module):
-    """
-    CBAM attention block for CBAM-ResNet.
-
-    Parameters:
-    ----------
-    channels : int
-        Number of input/output channels.
-    reduction_ratio : int, default 16
-        Channel reduction ratio.
-    """
-    def __init__(self,
-                 channels,
-                 reduction_ratio=16):
-        super(CbamBlock, self).__init__()
-        self.ch_gate = ChannelGate(
-            channels=channels,
-            reduction_ratio=reduction_ratio)
-        self.sp_gate = SpatialGate()
-
-    def forward(self, x):
-        x = self.ch_gate(x)
-        x = self.sp_gate(x)
-        return x
-
 class BasicConv2d(nn.Module):
 
     def __init__(self, in_planes, out_planes, kernel_size, stride, padding=0):
@@ -420,7 +304,7 @@ class InceptionResNetV2(nn.Module):
         )
         self.block8 = Block8(noReLU=True)
         self.conv2d_7b = BasicConv2d(2080, 1536, kernel_size=1, stride=1)
-        self.avgpool_1a = nn.AvgPool2d(8, count_include_pad=False)
+        self.avgpool_1a = nn.AdaptiveAvgPool2d(1)
         # self.last_linear = nn.Linear(1536, num_classes)
 
     def features(self, input):
@@ -450,7 +334,7 @@ class InceptionResNetV2(nn.Module):
 
     def forward(self, input):
         x = self.features(input)
-        # x = self.logits(x)
+        x = self.logits(x)
         return x
 
 def inceptionresnetv2(num_classes=1000, pretrained='imagenet'):
