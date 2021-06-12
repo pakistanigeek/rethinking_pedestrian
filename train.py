@@ -5,7 +5,7 @@ from collections import OrderedDict, defaultdict
 
 import numpy as np
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau, MultiStepLR
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 
 from batch_engine import valid_trainer, batch_trainer
@@ -13,13 +13,10 @@ from config import argument_parser
 from dataset.AttrDataset import AttrDataset, get_transform
 from loss.CE_loss import CEL_Sigmoid
 from models.base_block import FeatClassifier, BaseClassifier
-from models.cbamresnet import cbam_resnet50
-from models.bamresnet import bam_resnet50
 from models.inceptionresnetv2 import inceptionresnetv2
 from tools.function import get_model_log_path, get_pedestrian_metrics, get_pkl_rootpath
 from tools.utils import time_str, save_ckpt, ReDirectSTD, set_seed, print_label_metrics
 from torch.utils.tensorboard import SummaryWriter
-from ptflops import get_model_complexity_info
 set_seed(605)
 
 
@@ -69,10 +66,7 @@ def main(args):
     labels = train_set.label
     sample_weight = labels.mean(0)
 
-    # backbone = cbam_resnet50(pretrained=True)
-    backbone = resnet50()
-    # backbone = bam_resnet50(pretrained = True)
-    # backbone = inceptionresnetv2()
+    backbone = inceptionresnetv2()
 
     # ct = 0
     # for child in backbone.features.children():
@@ -83,32 +77,6 @@ def main(args):
     #             param.requires_grad = False
 
     classifier = BaseClassifier(nattr=train_set.attr_num)
-    #
-    # for child in backbone.children():
-    #         print(child._get_name())
-    #         for param in child.parameters():
-    #             param.requires_grad = False
-    #
-    # # enable training for spatial block
-    # for child in backbone.layer1.named_children():
-    #         for param in child[1].sp_gate.parameters():
-    #             param.requires_grad = True
-    #
-    # for child in backbone.layer2.named_children():
-    #         for param in child[1].sp_gate.parameters():
-    #             param.requires_grad = True
-    #
-    # for child in backbone.layer3.named_children():
-    #         for param in child[1].sp_gate.parameters():
-    #             param.requires_grad = True
-    #
-    # for child in backbone.layer4.named_children():
-    #         for param in child[1].sp_gate.parameters():
-    #             param.requires_grad = True
-    #
-    # # disable training for classifier
-    #
-    #
 
     model = FeatClassifier(backbone, classifier)
 
@@ -169,7 +137,7 @@ def trainer(epoch, model, train_loader, valid_loader, criterion, optimizer, lr_s
         )
 
         lr_scheduler.step(metrics=valid_loss, epoch=i)
-        # lr_scheduler.step(epoch=i)
+
         train_result = get_pedestrian_metrics(train_gt, train_probs)
         valid_result = get_pedestrian_metrics(valid_gt, valid_probs)
 
@@ -223,7 +191,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     main(args)
 
-    # os.path.abspath()
 
 """
 载入的时候要：
