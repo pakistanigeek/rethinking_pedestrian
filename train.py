@@ -70,9 +70,9 @@ def main(args):
     sample_weight = labels.mean(0)
 
     # backbone = cbam_resnet50(pretrained=True)
-    # backbone = resnet50()
+    backbone = resnet50()
     # backbone = bam_resnet50(pretrained = True)
-    backbone = inceptionresnetv2()
+    # backbone = inceptionresnetv2()
 
     # ct = 0
     # for child in backbone.features.children():
