@@ -8,6 +8,7 @@ from PIL import Image
 from tools.function import get_pkl_rootpath
 import torchvision.transforms as T
 
+from tools.segmentation import   instance_segmentation
 
 class AttrDataset(data.Dataset):
 
@@ -46,7 +47,10 @@ class AttrDataset(data.Dataset):
 
         imgname, gt_label, imgidx = self.img_id[index], self.label[index], self.img_idx[index]
         imgpath = os.path.join(self.root_path, imgname)
-        img = Image.open(imgpath)
+        # img = Image.open(imgpath)
+
+        img, pred_classes, masks = instance_segmentation(imgpath, rect_th=5, text_th=4)
+        img = Image.fromarray(img)
 
         if self.transform is not None:
             img = self.transform(img)
