@@ -26,7 +26,20 @@ def batch_trainer(epoch, model, train_loader, criterion, optimizer,writer):
             imgs, gt_label = imgs.cuda(), gt_label.cuda()
 
         train_logits = model(imgs, gt_label)
-        train_loss = criterion(train_logits, gt_label)
+        # train_loss = criterion(train_logits, gt_label)
+
+        if type(train_logits) == type(()) or type(train_logits) == type([]):
+            loss_list = []
+            # deep supervision
+            for k in range(len(train_logits)):
+                out = train_logits[k]
+                loss_list.append(criterion(out, gt_label))
+
+            train_loss = sum(loss_list)
+            # maximum voting
+            train_logits = torch.max(torch.max(torch.max(train_logits[0], train_logits[1])))
+        else:
+            train_loss = criterion(train_logits, gt_label)
 
         train_loss.backward()
         clip_grad_norm_(model.parameters(), max_norm=10.0)  # make larger learning rate works
@@ -68,7 +81,20 @@ def valid_trainer(model, valid_loader, criterion, writer):
             gt_list.append(gt_label.cpu().numpy())
             gt_label[gt_label == -1] = 0
             valid_logits = model(imgs)
-            valid_loss = criterion(valid_logits, gt_label)
+            # valid_loss = criterion(valid_logits, gt_label)
+
+            if type(valid_logits) == type(()) or type(valid_logits) == type([]):
+                loss_list = []
+                # deep supervision
+                for k in range(len(valid_logits)):
+                    out = valid_logits[k]
+                    loss_list.append(criterion(out, gt_label))
+
+                valid_loss = sum(loss_list)
+                # maximum voting
+                valid_logits = torch.max(torch.max(torch.max(valid_logits[0], valid_logits[1])))
+            else:
+                valid_loss = criterion(valid_logits, gt_label)
             valid_probs = torch.sigmoid(valid_logits)
             preds_probs.append(valid_probs.cpu().numpy())
             loss_meter.update(to_scalar(valid_loss))

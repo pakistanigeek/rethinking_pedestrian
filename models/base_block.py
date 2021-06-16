@@ -7,19 +7,30 @@ from torch.nn.modules.batchnorm import _BatchNorm
 class BaseClassifier(nn.Module):
     def __init__(self, nattr):
         super().__init__()
-        self.logits = nn.Sequential(
+        self.logits1 = nn.Sequential(
+            nn.Linear(1024, nattr),
+            nn.BatchNorm1d(nattr)
+        )
+        self.logits2 = nn.Sequential(
             nn.Linear(2048, nattr),
             nn.BatchNorm1d(nattr)
         )
+
+        self.pooling = nn.MaxPool2d((2), stride=2)
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
 
     def fresh_params(self):
         return self.parameters()
 
     def forward(self, feature):
-        feat = self.avg_pool(feature).view(feature.size(0), -1)
-        x = self.logits(feat)
-        return x
+        feature1, feature2 = feature
+        feature1 = self.pooling(feature1)
+        feat1 = self.avg_pool(feature1).view(feature1.size(0), -1)
+        feat2 = self.avg_pool(feature2).view(feature2.size(0), -1)
+
+        logits1 = self.logits1(feat1)
+        logits2 = self.logits2(feat2)
+        return logits1, logits2
 
 
 def initialize_weights(module):
@@ -52,6 +63,6 @@ class FeatClassifier(nn.Module):
         return self.backbone.parameters()
 
     def forward(self, x, label=None):
-        feat_map = self.backbone(x)
-        logits = self.classifier(feat_map)
+        feat_map1,feat_map2 = self.backbone(x)
+        logits = self.classifier((feat_map1,feat_map2))
         return logits
