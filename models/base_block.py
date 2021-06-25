@@ -2,20 +2,15 @@ import math
 
 import torch.nn as nn
 from torch.nn.modules.batchnorm import _BatchNorm
-
+import torch
 
 class BaseClassifier(nn.Module):
     def __init__(self, nattr):
         super().__init__()
-        self.logits1 = nn.Sequential(
-            nn.Linear(1024, nattr),
+        self.logits = nn.Sequential(
+            nn.Linear(3072, nattr),
             nn.BatchNorm1d(nattr)
         )
-        self.logits2 = nn.Sequential(
-            nn.Linear(2048, nattr),
-            nn.BatchNorm1d(nattr)
-        )
-
         self.pooling = nn.MaxPool2d((2), stride=2)
         self.avg_pool = nn.AdaptiveAvgPool2d(1)
 
@@ -28,9 +23,10 @@ class BaseClassifier(nn.Module):
         feat1 = self.avg_pool(feature1).view(feature1.size(0), -1)
         feat2 = self.avg_pool(feature2).view(feature2.size(0), -1)
 
-        logits1 = self.logits1(feat1)
-        logits2 = self.logits2(feat2)
-        return logits1, logits2
+        features =torch.cat((feat1 , feat2), dim=1)
+        logits = self.logits(features)
+
+        return logits
 
 
 def initialize_weights(module):
